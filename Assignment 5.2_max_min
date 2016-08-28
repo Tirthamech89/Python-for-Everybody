@@ -1,0 +1,21 @@
+largest = None
+smallest = None
+while True:
+    num = raw_input("Enter a number: ")
+    if num == "done" : break
+    if len(num)<1 : break
+    try:
+       xvar=int(num) 
+       if smallest is None:
+            smallest=xvar
+       elif xvar<smallest:
+            smallest=xvar  
+       if largest is None:
+            largest=xvar
+       elif xvar>largest:
+            largest=xvar      
+    except:
+       print 'Invalid input'
+       continue 
+print "Maximum is", int(largest)
+print "Minimum is", int(smallest)
