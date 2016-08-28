@@ -1,0 +1,9 @@
+hrs = raw_input("Enter Hours:")
+h = float(hrs)
+rate = raw_input("Enter Rate:")
+rt=float(rate)
+if h>40 :
+    py=40 * rt + (h-40) * rt * 1.5
+else :
+    py=h * rt
+print py
