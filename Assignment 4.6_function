@@ -1,0 +1,12 @@
+def computepay(h,r):
+    if tm<=40:
+        x=40*float(tm)
+    else:
+        x=40*float(tm) + (float(hrs)-40)*float(tm)*1.5
+    return x
+
+hrs = raw_input("Enter Hours:")
+tm = raw_input("Enter Hours:")
+
+p = computepay(hrs,tm)
+print p
