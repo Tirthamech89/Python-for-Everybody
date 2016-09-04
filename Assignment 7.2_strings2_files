@@ -1,0 +1,13 @@
+fname = raw_input("Enter file name: ")
+fh = open(fname)
+s=0
+cnt=0
+for line in fh:
+    if not line.startswith("X-DSPAM-Confidence:") : continue
+    line=line.rstrip()
+    pos= line.find(' ')
+    ct=line[pos:].strip()
+    cx=float(ct)
+    s=s+cx
+    cnt=cnt+1
+print 'Average spam confidence:',s/cnt
