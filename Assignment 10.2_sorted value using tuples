@@ -1,0 +1,18 @@
+fname = raw_input("Enter file name: ")
+fh=open(fname)
+count=0
+fdt=list()
+for line in fh:
+    if not line.startswith("From") : continue
+    line=line.rstrip()
+    words=line.split()
+    if len(words[0])>4: continue
+    es=words[5]
+    pos= es.find(':')
+    ct=es[:pos].strip()    
+    fdt.append(ct)
+counts=dict()
+for i in fdt:
+    counts[i]=counts.get(i,0)+1
+for k,v in sorted(counts.items()):
+    print k,v
