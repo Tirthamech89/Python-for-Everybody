@@ -1,0 +1,20 @@
+fname = raw_input("Enter file name: ")
+fh=open(fname)
+count=0
+fdt=list()
+for line in fh:
+    if not line.startswith("From") : continue
+    line=line.rstrip()
+    words=line.split()
+    if len(words[0])>4: continue
+    fdt.append(words[1])
+abc=dict()
+for wd in fdt:
+    abc[wd]=abc.get(wd,0)+1
+bigwd=None
+bigcnt=None
+for wd,ct in abc.items():
+    if bigcnt is None or ct>bigcnt:
+        bigwd=wd
+        bigcnt=ct
+print bigwd,bigcnt
