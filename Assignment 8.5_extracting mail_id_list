@@ -1,0 +1,13 @@
+fname = raw_input("Enter file name: ")
+fh=open(fname)
+count=0
+fdt=list()
+for line in fh:
+    if not line.startswith("From") : continue
+    line=line.rstrip()
+    words=line.split()
+    if len(words[0])>4: continue
+    print words[1]
+    count=count+1
+
+print "There were", count, "lines in the file with From as the first word"
