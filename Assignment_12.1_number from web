@@ -1,0 +1,16 @@
+import urllib
+import re
+from BeautifulSoup import *
+
+url = raw_input('Enter - ')
+html = urllib.urlopen(url).read()
+sum=0
+soup = BeautifulSoup(html)
+tags = soup('span')
+for tag in tags:
+    y=str(tag)
+    x= re.findall("[0-9]+",y)
+    for i in x:
+        i=int(i)
+        sum=sum+i
+print sum
