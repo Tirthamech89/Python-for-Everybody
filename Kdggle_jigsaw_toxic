@@ -1,0 +1,218 @@
+import pandas as pd
+import string
+import numpy as np
+import nltk
+import random
+import chardet
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer, WordNetLemmatizer
+from nltk.stem.snowball import SnowballStemmer
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import roc_auc_score
+
+train=pd.read_csv('C:/Users/Tirthankar/Desktop/Kaggle/Jigsaw_toxic/train_v1.csv')
+train1=train.replace('\n',' ', regex=True)
+
+#Step1: Punctuation removal
+train1['cleaned']=train1['comment_text'].str.replace('[^\w\s]','')
+
+#Step2: Removal of Stop words
+nltk.download('stopwords')
+stop = stopwords.words('english')
+train1['cleaned_without_stopwords'] = train1['cleaned'].apply(lambda x: ' '.join([word for word in x.split() if word not in (stop)]))
+
+#No. of Uppercase
+train1['Upper']=train1.cleaned_without_stopwords.str.count('[A-Z]')
+#No. of Lowercase
+train1['lower']=train1.cleaned_without_stopwords.str.count('[a-z]')
+
+train1['total_letter']=train1['lower']+train1['Upper']
+train1['percent_lower']=train1['lower']/train1['total_letter']
+train1['percent_upper']=train1['Upper']/train1['total_letter']
+
+stemmer = SnowballStemmer("english")
+train1['stemmed'] = train1["cleaned_without_stopwords"].apply(lambda x: [stemmer.stem(y) for y in x])
+
+model_toxic=train1[['cleaned_without_stopwords','toxic']]
+model_toxic.describe()
+print((model_toxic['toxic'].sum())/model_toxic.shape[0])
+
+#Train_Test Split
+X_train, X_test, y_train, y_test = train_test_split(model_toxic["cleaned_without_stopwords"], 
+                                                    model_toxic['toxic'], test_size=0.30,
+                                                    random_state=0)
+print(y_test.sum()/y_test.shape[0])
+print(y_train.sum()/y_train.shape[0])
+
+random.seed(54621)
+vect = CountVectorizer().fit(X_train)
+X_train_vectorized = vect.transform(X_train)
+clf = MultinomialNB(alpha=0.1)
+model_tox_nb = clf.fit(X_train_vectorized, y_train)
+predictions = model_tox_nb.predict(vect.transform(X_test))
+predictions_prob = model_tox_nb.predict_proba(vect.transform(X_test))
+auc=roc_auc_score(y_test, predictions)
+auc
+#0.84406225407557989
+
+model_st_toxic=train1[['cleaned_without_stopwords','severe_toxic']]
+model_st_toxic.describe()
+print((model_st_toxic['severe_toxic'].sum())/model_st_toxic.shape[0])
+
+#Train_Test Split
+X_train_st, X_test_st, y_train_st, y_test_st = train_test_split(model_st_toxic["cleaned_without_stopwords"], 
+                                                    model_st_toxic['severe_toxic'], test_size=0.30,
+                                                    random_state=0)
+print(y_test_st.sum()/y_test_st.shape[0])
+print(y_train_st.sum()/y_train_st.shape[0])
+
+random.seed(54621)
+vect_st = CountVectorizer().fit(X_train_st)
+X_train_vectorized_st = vect_st.transform(X_train_st)
+clf_st = MultinomialNB(alpha=0.05)
+model_tox_st_nb = clf_st.fit(X_train_vectorized_st, y_train_st)
+predictions_st = model_tox_st_nb.predict(vect_st.transform(X_test_st))
+predictions_st_prob = model_tox_st_nb.predict_proba(vect_st.transform(X_test_st))
+auc_st=roc_auc_score(y_test_st, predictions_st)
+auc_st
+#0.82292242054293452
+
+model_ob_toxic=train1[['cleaned_without_stopwords','obscene']]
+model_ob_toxic.describe()
+print((model_ob_toxic['obscene'].sum())/model_ob_toxic.shape[0])
+
+#Train_Test Split
+X_train_ob, X_test_ob, y_train_ob, y_test_ob = train_test_split(model_ob_toxic["cleaned_without_stopwords"], 
+                                                    model_ob_toxic['obscene'], test_size=0.30,
+                                                    random_state=0)
+print(y_test_ob.sum()/y_test_ob.shape[0])
+print(y_train_ob.sum()/y_train_ob.shape[0])
+
+random.seed(54621)
+vect_ob = CountVectorizer().fit(X_train_ob)
+X_train_vectorized_ob = vect_ob.transform(X_train_ob)
+clf_ob = MultinomialNB(alpha=0.1)
+model_tox_ob_nb = clf_ob.fit(X_train_vectorized_ob, y_train_ob)
+predictions_ob = model_tox_ob_nb.predict(vect_ob.transform(X_test_ob))
+predictions_ob_prob = model_tox_ob_nb.predict_proba(vect_ob.transform(X_test_ob))
+auc_ob=roc_auc_score(y_test_ob, predictions_ob)
+auc_ob
+#0.86185342528283038
+
+model_tt_toxic=train1[['cleaned_without_stopwords','threat']]
+model_tt_toxic.describe()
+print((model_tt_toxic['threat'].sum())/model_tt_toxic.shape[0])
+
+#Train_Test Split
+X_train_tt, X_test_tt, y_train_tt, y_test_tt = train_test_split(model_tt_toxic["cleaned_without_stopwords"], 
+                                                    model_tt_toxic['threat'], test_size=0.30,
+                                                    random_state=0)
+print(y_test_tt.sum()/y_test_tt.shape[0])
+print(y_train_tt.sum()/y_train_tt.shape[0])
+
+random.seed(54621)
+vect_tt = CountVectorizer().fit(X_train_tt)
+X_train_vectorized_tt = vect_tt.transform(X_train_tt)
+clf_tt = MultinomialNB(alpha=0.01)
+model_tox_tt_nb = clf_tt.fit(X_train_vectorized_tt, y_train_tt)
+predictions_tt = model_tox_tt_nb.predict(vect_tt.transform(X_test_tt))
+predictions_tt_prob = model_tox_tt_nb.predict_proba(vect_tt.transform(X_test_tt))
+auc_tt=roc_auc_score(y_test_tt, predictions_tt)
+auc_tt
+#0.75567738198047318
+
+model_it_toxic=train1[['cleaned_without_stopwords','insult']]
+model_it_toxic.describe()
+print((model_it_toxic['insult'].sum())/model_it_toxic.shape[0])
+
+#Train_Test Split
+X_train_it, X_test_it, y_train_it, y_test_it = train_test_split(model_it_toxic["cleaned_without_stopwords"], 
+                                                    model_it_toxic['insult'], test_size=0.30,
+                                                    random_state=0)
+print(y_test_it.sum()/y_test_it.shape[0])
+print(y_train_it.sum()/y_train_it.shape[0])
+
+random.seed(54621)
+vect_it = CountVectorizer().fit(X_train_it)
+X_train_vectorized_it = vect_it.transform(X_train_it)
+clf_it = MultinomialNB(alpha=0.1)
+model_tox_it_nb = clf_it.fit(X_train_vectorized_it, y_train_it)
+predictions_it = model_tox_it_nb.predict(vect_it.transform(X_test_it))
+predictions_it_prob = model_tox_it_nb.predict_proba(vect_it.transform(X_test_it))
+auc_it=roc_auc_score(y_test_it, predictions_it)
+auc_it
+#0.84129548064824089
+
+model_ih_toxic=train1[['cleaned_without_stopwords','identity_hate']]
+model_ih_toxic.describe()
+print((model_ih_toxic['identity_hate'].sum())/model_ih_toxic.shape[0])
+
+#Train_Test Split
+X_train_ih, X_test_ih, y_train_ih, y_test_ih = train_test_split(model_ih_toxic["cleaned_without_stopwords"], 
+                                                    model_ih_toxic['identity_hate'], test_size=0.30,
+                                                    random_state=0)
+print(y_test_ih.sum()/y_test_ih.shape[0])
+print(y_train_ih.sum()/y_train_ih.shape[0])
+
+random.seed(54621)
+vect_ih = CountVectorizer().fit(X_train_ih)
+X_train_vectorized_ih = vect_ih.transform(X_train_ih)
+clf_ih = MultinomialNB(alpha=0.05)
+model_tox_ih_nb = clf_ih.fit(X_train_vectorized_ih, y_train_ih)
+predictions_ih = model_tox_ih_nb.predict(vect_ih.transform(X_test_ih))
+predictions_ih_prob = model_tox_ih_nb.predict_proba(vect_ih.transform(X_test_ih))
+auc_ih=roc_auc_score(y_test_ih, predictions_ih)
+auc_ih
+#0.76613132510394577
+
+test_chk = pd.read_csv('C:/Users/Tirthankar/Desktop/Kaggle/Jigsaw_toxic/test_v2.csv')
+test_chk1=test_chk.replace('\n',' ', regex=True)
+test_chk1['cleaned']=test_chk1['comment_text'].str.replace('[^\w\s]','')
+#Step2: Removal of Stop words
+nltk.download('stopwords')
+stop = stopwords.words('english')
+test_chk1['cleaned_without_stopwords'] = test_chk1['cleaned'].apply(lambda x: ' '.join([word for word in x.split() if word not in (stop)]))
+test_comment=test_chk1['cleaned_without_stopwords']
+
+predictions_prob_test_tx = model_tox_nb.predict_proba(vect.transform(test_comment))
+chk_td=pd.DataFrame(predictions_prob_test_tx, columns=list('xy'))
+toxic1=chk_td[['y']]
+toxic1.rename(columns={'y': 'toxic'}, inplace=True)
+id=pd.DataFrame(test_chk1['id'])
+horizontalStack_1 = pd.concat([id, toxic1], axis=1)
+
+predictions_st_prob_test = model_tox_st_nb.predict_proba(vect_st.transform(test_comment))
+chk_td=pd.DataFrame(predictions_st_prob_test, columns=list('xy'))
+st_toxic1=chk_td[['y']]
+st_toxic1.rename(columns={'y': 'severe_toxic'}, inplace=True)
+horizontalStack_2 = pd.concat([horizontalStack_1, st_toxic1], axis=1)
+
+predictions_ob_prob_test = model_tox_ob_nb.predict_proba(vect_ob.transform(test_comment))
+chk_td=pd.DataFrame(predictions_ob_prob_test, columns=list('xy'))
+ob_toxic1=chk_td[['y']]
+ob_toxic1.rename(columns={'y': 'obscene'}, inplace=True)
+horizontalStack_3 = pd.concat([horizontalStack_2, ob_toxic1], axis=1)
+
+predictions_tt_prob_test = model_tox_tt_nb.predict_proba(vect_tt.transform(test_comment))
+chk_td=pd.DataFrame(predictions_tt_prob_test, columns=list('xy'))
+tt_toxic1=chk_td[['y']]
+tt_toxic1.rename(columns={'y': 'threat'}, inplace=True)
+horizontalStack_4 = pd.concat([horizontalStack_3, tt_toxic1], axis=1)
+
+predictions_it_prob_test = model_tox_it_nb.predict_proba(vect_it.transform(test_comment))
+chk_td=pd.DataFrame(predictions_it_prob_test, columns=list('xy'))
+it_toxic1=chk_td[['y']]
+it_toxic1.rename(columns={'y': 'insult'}, inplace=True)
+horizontalStack_5 = pd.concat([horizontalStack_4, it_toxic1], axis=1)
+
+predictions_ih_prob_test = model_tox_ih_nb.predict_proba(vect_ih.transform(test_comment))
+chk_td=pd.DataFrame(predictions_ih_prob_test, columns=list('xy'))
+ih_toxic1=chk_td[['y']]
+ih_toxic1.rename(columns={'y': 'identity_hate'}, inplace=True)
+horizontalStack_6 = pd.concat([horizontalStack_5, ih_toxic1], axis=1)
+
+
+
+
